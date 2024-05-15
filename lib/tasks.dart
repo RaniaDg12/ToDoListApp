@@ -83,35 +83,35 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Ajouter une tâche'),
+          title: Text('Add Task'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'Titre'),
+                decoration: InputDecoration(labelText: 'Title'),
               ),
               TextField(
                 controller: _descriptionController,
                 decoration: InputDecoration(labelText: 'Description'),
               ),
-        DropdownButtonFormField<String>(
-          value: _selectedCategory,
-          onChanged: (String? value) {
-            setState(() {
-              _selectedCategory = value!;
-            });
-          },
-          items: ['Work', 'Personal', 'Shopping'].map((String category) {
-            return DropdownMenuItem<String>(
-              value: category,
-              child: Text(category),
-            );
-          }).toList(),
-          decoration: InputDecoration(labelText: 'Category'),
-        ),
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                onChanged: (String? value) {
+                  setState(() {
+                    _selectedCategory = value!;
+                  });
+                },
+                items: ['Work', 'Personal', 'Shopping'].map((String category) {
+                  return DropdownMenuItem<String>(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
+                decoration: InputDecoration(labelText: 'Category'),
+              ),
 
-        Padding(
+              Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   children: [
@@ -141,7 +141,7 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
                     Flexible(
                       child: GestureDetector(
                         onTap: _selectTime,
-                        child: Text('Heure: ${_selectedTime.hour}:${_selectedTime.minute}'),
+                        child: Text('Time: ${_selectedTime.hour}:${_selectedTime.minute}'),
                       ),
                     ),
                   ],
@@ -158,7 +158,7 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
                 if (title.isEmpty || description.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Veuillez remplir tous les champs'),
+                      content: Text('Please fill all fields'),
                       duration: Duration(seconds: 2),
                     ),
                   );
@@ -179,15 +179,15 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
                     'category': _selectedCategory,
                   })
                       .then((value) {
-                    print('Tâche ajoutée avec succès!');
+                    print('Task added successfully!');
                     Navigator.pop(context);
                   })
                       .catchError((error) {
-                    print('Erreur lors de l\'ajout de la tâche: $error');
+                    print('Error adding task: $error');
                   });
                 }
               },
-              child: Text('Ajouter'),
+              child: Text('Add'),
             ),
           ],
         );
@@ -240,13 +240,13 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Modifier la tâche'),
+          title: Text('Edit task'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'Titre'),
+                decoration: InputDecoration(labelText: 'Title'),
               ),
               TextField(
                 controller: _descriptionController,
@@ -271,7 +271,7 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
                   children: [
                     Icon(Icons.access_time),
                     SizedBox(width: 10),
-                    Text('Heure: ${_selectedTime.hour}:${_selectedTime.minute}'),
+                    Text('Time: ${_selectedTime.hour}:${_selectedTime.minute}'),
                   ],
                 ),
               ),
@@ -286,7 +286,7 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
                 if (title.isEmpty || description.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Veuillez remplir tous les champs'),
+                      content: Text('Please fill all fields'),
                       duration: Duration(seconds: 2),
                     ),
                   );
@@ -307,15 +307,15 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
                     'date': selectedDateTime,
                   })
                       .then((value) {
-                    print('Tâche modifiée avec succès!');
+                    print('Task modified successfully!');
                     Navigator.pop(context);
                   })
                       .catchError((error) {
-                    print('Erreur lors de la modification de la tâche: $error');
+                    print('Error modifying task: $error');
                   });
                 }
               },
-              child: Text('Modifier'),
+              child: Text('Edit'),
             ),
           ],
         );
@@ -329,11 +329,12 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
     tasksCollection
         .doc(todo.id)
         .delete()
-        .then((value) => print('Tâche supprimée avec succès!'))
+        .then((value) => print('Task deleted successfully!'))
         .catchError((error) =>
-        print('Erreur lors de la suppression de la tâche: $error'));
+        print('Error deleting task: $error'));
   }
 
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -344,89 +345,113 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
         backgroundColor: Colors.purple,
         automaticallyImplyLeading: false,
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: tasksCollection.snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return Text('Erreur: ${snapshot.error}');
-          }
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Search',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: tasksCollection.snapshots(),
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
 
-          List<ToDoList> todoList = snapshot.data!.docs
-              .map((DocumentSnapshot document) {
-            Map<String, dynamic>? data =
-            document.data() as Map<String, dynamic>?;
+                List<ToDoList> filteredTodoList = snapshot.data!.docs
+                    .map((DocumentSnapshot document) {
+                  Map<String, dynamic>? data =
+                  document.data() as Map<String, dynamic>?;
 
-            if (data == null) {
-              return null;
-            }
+                  if (data == null) {
+                    return null;
+                  }
 
-            return ToDoList(
-              id: document.id,
-              title: data['title'] ?? '',
-              description: data['description'] ?? '',
-              date: data['date']?.toDate() ?? DateTime.now(),
-              time: data['date'] != null
-                  ? TimeOfDay.fromDateTime(data['date']!.toDate())
-                  : TimeOfDay.now(),
-              category: data['category'] ?? '',
-            );
-          }).where((element) => element != null).toList().cast<ToDoList>();
+                  return ToDoList(
+                    id: document.id,
+                    title: data['title'] ?? '',
+                    description: data['description'] ?? '',
+                    date: data['date']?.toDate() ?? DateTime.now(),
+                    time: data['date'] != null
+                        ? TimeOfDay.fromDateTime(data['date']!.toDate())
+                        : TimeOfDay.now(),
+                    category: data['category'] ?? '',
+                  );
+                }).where((element) {
+                  return element != null &&
+                      (element.title.toLowerCase().contains(_searchQuery) ||
+                          element.description.toLowerCase().contains(_searchQuery));
+                }).toList().cast<ToDoList>();
 
-          return ListView.builder(
-            itemCount: todoList.length,
-            itemBuilder: (context, index) {
-              ToDoList todo = todoList[index];
-              Color taskColor = _getTaskColor(todo.category); // Get color based on category
-              return Card(
-                color: taskColor,
-                child: ListTile(
-                  title: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(todo.title),
-                      SizedBox(height: 5),
-                      Text('${todo.description}'),
-                      SizedBox(height: 5),
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_today),
-                          SizedBox(width: 5),
-                          Text('${todo.date.day}/${todo.date.month}/${todo.date.year}'),
-                          SizedBox(width: 20),
-                          Icon(Icons.access_time),
-                          SizedBox(width: 5),
-                          Text('${todo.time.hour}:${todo.time.minute}'),
-                        ],
+                return ListView.builder(
+                  itemCount: filteredTodoList.length,
+                  itemBuilder: (context, index) {
+                    ToDoList todo = filteredTodoList[index];
+                    Color taskColor = _getTaskColor(todo.category);
+                    return Card(
+                      color: taskColor,
+                      child: ListTile(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(todo.title),
+                            SizedBox(height: 5),
+                            Text('${todo.description}'),
+                            SizedBox(height: 5),
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today),
+                                SizedBox(width: 5),
+                                Text('${todo.date.day}/${todo.date.month}/${todo.date.year}'),
+                                SizedBox(width: 20),
+                                Icon(Icons.access_time),
+                                SizedBox(width: 5),
+                                Text('${todo.time.hour}:${todo.time.minute}'),
+                              ],
+                            ),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                _showEditToDoListForm(context, todo);
+                              },
+                              icon: Icon(Icons.edit),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                _deleteToDoList(todo);
+                              },
+                              icon: Icon(Icons.delete),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          _showEditToDoListForm(context, todo);
-                        },
-                        icon: Icon(Icons.edit),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          _deleteToDoList(todo);
-                        },
-                        icon: Icon(Icons.delete),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-
-        },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
@@ -436,6 +461,7 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
               icon: Icon(Icons.home),
               onPressed: () {
                 // Navigate to home screen
+                Navigator.pushNamed(context, '/tasks');
               },
             ),
             IconButton(
@@ -455,7 +481,6 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
                     'totalTasks': 10, // Replace with actual total tasks count
                   },
                 );
-
               },
             ),
           ],
@@ -463,4 +488,5 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
       ),
     );
   }
+
 }

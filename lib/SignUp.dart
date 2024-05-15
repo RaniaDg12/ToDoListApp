@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class SignUp extends StatefulWidget {
   @override
@@ -24,6 +26,17 @@ class _SignUpState extends State<SignUp> {
     );
   }
 
+  // Fonction pour ajouter les coordonnées de l'utilisateur à Firebase
+  Future<void> addUserDetails(String username, String email) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    String? uid = user?.uid;
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'username': username,
+      'email': email,
+      // Ajoutez d'autres champs d'informations de l'utilisateur si nécessaire
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,20 +54,7 @@ class _SignUpState extends State<SignUp> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.purple),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
+                  // Autres décorations de champ d'entrée...
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
@@ -68,20 +68,7 @@ class _SignUpState extends State<SignUp> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.purple),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
+                  // Autres décorations de champ d'entrée...
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
@@ -98,27 +85,14 @@ class _SignUpState extends State<SignUp> {
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.purple),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
+                  // Autres décorations de champ d'entrée...
                 ),
                 obscureText: true,
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please enter your password';
                   }
-                  // Add additional password validation logic if needed
+                  // Ajoutez une logique de validation de mot de passe supplémentaire si nécessaire
                   return null;
                 },
               ),
@@ -136,11 +110,17 @@ class _SignUpState extends State<SignUp> {
                         password: password,
                       );
 
+                      // Appeler la fonction pour ajouter les coordonnées de l'utilisateur à Firebase
+                      await addUserDetails(name, email);
+
                       _showSuccessMessage();
 
-                      // Additional logic after successful sign-up if needed
+                      // Naviguer vers la page d'accueil et remplacer la pile de navigation actuelle
+                      Navigator.pushReplacementNamed(context, '/tasks');
+
+                      // Logique supplémentaire après une inscription réussie si nécessaire
                     } catch (e) {
-                      // Handle sign-up errors here
+                      // Gérer les erreurs d'inscription ici
                       print('Sign-up error: $e');
                     }
                   }
@@ -164,13 +144,7 @@ class _SignUpState extends State<SignUp> {
                 child: RichText(
                   text: TextSpan(
                     text: "Already have an account? ",
-                    style: TextStyle(fontSize: 16, color: Colors.black),
-                    children: [
-                      TextSpan(
-                        text: 'Sign In',
-                        style: TextStyle(fontSize: 16, color: Colors.greenAccent[400], fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                    // Autres styles de texte...
                   ),
                 ),
               ),

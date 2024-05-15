@@ -5,6 +5,7 @@ import 'Home.dart';
 import 'SignIn.dart';
 import 'SignUp.dart';
 import 'profile.dart';
+import 'tasks.dart';
 
 
 void main() async {
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => Home(),
         '/signup': (context) => SignUp(),
         '/signin': (context) => SignIn(),
+        '/tasks': (context) => ToDoListScreen(),
         '/profile': (context) => ProfilePage(),
       },
     );
