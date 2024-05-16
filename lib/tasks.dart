@@ -32,14 +32,14 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
   Color _getTaskColor(String category) {
     switch (category) {
       case 'Work':
-        return Colors.deepPurpleAccent; // Example color for the Work category
+        return Colors.blue.shade100; // Example color for the Work category
       case 'Personal':
-        return Colors.deepPurple.shade200; // Example color for the Personal category
+        return Colors.green.shade100; // Example color for the Personal category
       case 'Shopping':
-        return Colors.deepPurple.shade100; // Example color for the Shopping category
+        return Colors.red.shade100; // Example color for the Shopping category
     // Add more cases for other categories
       default:
-        return Colors.deepPurple.shade50; // Default color
+        return Colors.grey.shade100; // Default color
     }
   }
 
@@ -362,6 +362,7 @@ class _ToDoListScreenState extends State<ToDoListScreen> {
               ),
             ),
           ),
+
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: tasksCollection.snapshots(),

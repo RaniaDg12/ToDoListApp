@@ -39,15 +39,7 @@ class ProfilePage extends StatelessWidget {
                 appBar: AppBar(
                   title: Text('My Profile'),
                   backgroundColor: Colors.purple,
-                  actions: [
-                    IconButton(
-                      icon: Icon(Icons.logout),
-                      onPressed: () {
-                        FirebaseAuth.instance.signOut();
-                        Navigator.pushReplacementNamed(context, '/signin');
-                      },
-                    ),
-                  ],
+
                 ),
                 body: Center(
                   child: Column(
@@ -55,7 +47,7 @@ class ProfilePage extends StatelessWidget {
                     children: <Widget>[
                       CircleAvatar(
                         radius: 50,
-                        backgroundImage: AssetImage('assets/profile_placeholder.jpg'),
+                        backgroundImage: AssetImage('assets/user.png'),
                       ),
                       SizedBox(height: 20),
                       Text(
@@ -76,7 +68,7 @@ class ProfilePage extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: Colors.purple,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -87,9 +79,120 @@ class ProfilePage extends StatelessWidget {
                           ),
                         ),
                       ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Category',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: () {
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 100,
+                        child: GridView.count(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 10.0,
+                          mainAxisSpacing: 10.0,
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                _showTasksForCategory(context, 'Work');
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade100,
+                                  borderRadius: BorderRadius.circular(10.10),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Work',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                _showTasksForCategory(context, 'Shopping');
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade100,
+                                  borderRadius: BorderRadius.circular(10.10),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Shopping',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                _showTasksForCategory(context, 'Personal');
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(10.10),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Personal',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          elevation: 5,
+                        ),
+                        onPressed: () {
+                          // Ajoutez ici la logique pour se déconnecter
+                          FirebaseAuth.instance.signOut();
+                          Navigator.pushReplacementNamed(context, '/');
+                        },
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                            Icon(Icons.logout), // Icône de déconnexion
+                        SizedBox(width: 8), // Espacement entre l'icône et le texte
+                          Text(
+                            'Logout',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.purple
+                            ),
+                          ),
+                          ],
+                        ),
+                      )
+
                     ],
+
                   ),
                 ),
+
                 bottomNavigationBar: BottomAppBar(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -133,6 +236,42 @@ class ProfilePage extends StatelessWidget {
       return Container();
     }
   }
+
+
+  void _showTasksForCategory(BuildContext context, String category) {
+    FirebaseFirestore.instance.collection('tasks_db').where('category', isEqualTo: category).get().then((querySnapshot) {
+      // Handle retrieved tasks and display them
+      List<String> taskTitles = [];
+      querySnapshot.docs.forEach((doc) {
+        taskTitles.add(doc['title']);
+      });
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Tasks for $category'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: taskTitles.map((title) => Text(title)).toList(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    }).catchError((error) {
+      print('Error retrieving tasks: $error');
+    });
+  }
+
 
   // Function to show add task form
   void _showAddToDoListForm(BuildContext context) {
